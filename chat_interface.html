@@ -1,7 +1,9 @@
+<!DOCTYPE html>
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbox Interface</title>
+    <title>CloudBase Chat</title>
     <style>
         body { font-family: Arial, sans-serif; }
         #chat-interface { max-width: 600px; margin: auto; }
@@ -94,8 +96,9 @@
             body: formData,
         });
         const data = await response.json();
-        document.getElementById('upload-response').innerHTML = `<div>${data.message}</div>`;
+        document.getElementById('upload-response').textContent = data.message;
     };
 
 </script>
 </body>
+</html>

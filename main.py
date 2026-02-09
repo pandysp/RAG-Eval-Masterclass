@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from llama_index.core import (
@@ -11,18 +11,22 @@ from llama_index.core import (
 )
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai import OpenAI
-from IPython.display import Markdown
 from dotenv import load_dotenv
 import os
+import sys
 
 # Load API key from external file
 config_path = "./openai_key.env"
 load_dotenv(dotenv_path=config_path)
 api_key = os.getenv("OPENAI_API_KEY")
+if not api_key or api_key == "your_api_key_here":
+    print("ERROR: OPENAI_API_KEY is not set or still the placeholder.")
+    print("Please set your key in openai_key.env")
+    sys.exit(1)
 os.environ["OPENAI_API_KEY"] = api_key
 
 # Models
-Settings.llm = OpenAI(model="gpt-3.5-turbo")
+Settings.llm = OpenAI(model="gpt-4o-mini")
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
 # Chunking (512 tokens, 50 overlap — LlamaIndex defaults)
@@ -96,7 +100,10 @@ query_engine = index.as_query_engine(
 
 def update_query_engine(index):
     global query_engine
-    query_engine = index.as_query_engine()
+    query_engine = index.as_query_engine(
+        response_mode="tree_summarize",
+        summary_template=SYSTEM_PROMPT,
+    )
 
 
 app = FastAPI()
@@ -104,7 +111,7 @@ app = FastAPI()
 SUPPORTED_EXTENSIONS = (".txt", ".pdf", ".md")
 
 
-def filter_file_format(files: List[UploadFile]) -> tuple:
+def filter_file_format(files: list[UploadFile]) -> tuple:
     filtered = [f for f in files if f.filename.endswith(SUPPORTED_EXTENSIONS)]
     removed = [f.filename for f in files if not f.filename.endswith(SUPPORTED_EXTENSIONS)]
     return removed, filtered
@@ -113,7 +120,7 @@ def filter_file_format(files: List[UploadFile]) -> tuple:
 @app.post("/ingest")
 async def ingest(
     files: Annotated[
-        List[UploadFile], File(description="Multiple files as UploadFile")
+        list[UploadFile], File(description="Multiple files as UploadFile")
     ],
 ):
     if len(files) == 1 and files[0].filename == "":
@@ -171,27 +178,24 @@ async def ingest(
                 content={"message": f"Failed to clean up temp files: {e}"},
             )
 
-    return {
-        "message": (
-            f"Removed from uploads (unsupported format):<br>"
-            f"- {'<br>- '.join([os.path.basename(d) for d in removed_documents])}<br><br>"
-            f"Successfully uploaded:<br>"
-            f"- {'<br>- '.join([os.path.basename(d) for d in new_documents])}<br><br>"
-        )
-    }
+    lines = []
+    if removed_documents:
+        lines.append("Removed (unsupported format): " + ", ".join(removed_documents))
+    if new_documents:
+        lines.append("Uploaded: " + ", ".join(os.path.basename(d) for d in new_documents))
+    return {"message": "\n".join(lines) or "No files processed."}
 
 
 @app.get("/query")
 async def search_query(query: str):
-    if query == "":
+    if not query.strip():
         return JSONResponse(
             status_code=400,
             content={"message": "No query text detected."},
         )
     try:
         response = query_engine.query(query)
-        results = Markdown(f"{response}")
-        return {"query": query, "results": results.data}
+        return {"query": query, "results": str(response)}
     except Exception as e:
         return JSONResponse(
             status_code=500,
@@ -202,7 +206,7 @@ async def search_query(query: str):
 @app.get("/query_with_context")
 async def query_with_context(query: str):
     """Query endpoint that returns both the answer and source documents for evaluation."""
-    if query == "":
+    if not query.strip():
         return JSONResponse(
             status_code=400,
             content={"message": "No query text detected."},
@@ -211,16 +215,15 @@ async def query_with_context(query: str):
         response = query_engine.query(query)
 
         sources = []
-        if hasattr(response, "source_nodes"):
-            for node in response.source_nodes:
-                source_info = {
-                    "text": node.node.text if hasattr(node.node, "text") else "",
-                    "score": node.score if hasattr(node, "score") else None,
-                }
-                if hasattr(node.node, "metadata") and node.node.metadata:
-                    source_info["filename"] = node.node.metadata.get("filename", "")
-                    source_info["metadata"] = node.node.metadata
-                sources.append(source_info)
+        for node in getattr(response, "source_nodes", []):
+            metadata = getattr(node.node, "metadata", {}) or {}
+            source_info = {
+                "text": getattr(node.node, "text", ""),
+                "score": getattr(node, "score", None),
+                "filename": metadata.get("filename", ""),
+                "metadata": metadata,
+            }
+            sources.append(source_info)
 
         return {
             "query": query,
@@ -238,9 +241,9 @@ def load_content():
     try:
         with open("chat_interface.html", "r") as file:
             return file.read()
-    except IOError as e:
+    except OSError as e:
         print(f"Error reading file: {e}")
-        return None
+        return "<html><body><h1>Error: chat_interface.html not found</h1></body></html>"
 
 
 @app.get("/")

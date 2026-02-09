@@ -23,13 +23,9 @@ OUTPUT_CSV = "collected_answers.csv"
 
 
 def query_rag(query: str) -> dict:
-    try:
-        response = requests.get(API_URL, params={"query": query}, timeout=60)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"  Error: {e}")
-        return {"answer": "", "sources": []}
+    response = requests.get(API_URL, params={"query": query}, timeout=60)
+    response.raise_for_status()
+    return response.json()
 
 
 def format_chunks(sources: list) -> str:
@@ -47,7 +43,7 @@ def main():
     # Pre-flight: check server is running
     try:
         requests.get("http://127.0.0.1:8000/query?query=ping", timeout=5)
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException:
         print("ERROR: RAG server is not running!")
         print("Start it with: uvicorn main:app --host 127.0.0.1 --port 8000")
         sys.exit(1)
@@ -58,7 +54,11 @@ def main():
     results = []
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Collecting answers"):
         frage = row["frage"]
-        response = query_rag(frage)
+        try:
+            response = query_rag(frage)
+        except (requests.exceptions.RequestException, ValueError) as e:
+            print(f"  ERROR querying '{frage[:60]}': {e}")
+            response = {"answer": f"ERROR: {e}", "sources": []}
 
         sources = response.get("sources", [])
         retrieved_files = [

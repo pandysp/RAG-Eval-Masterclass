@@ -19,7 +19,7 @@ import time
 import requests
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import APIError, OpenAI
 
 BASE_URL = "http://localhost:8000"
 INPUT_CSV = "cloudbase-testfragen.csv"
@@ -28,7 +28,12 @@ JUDGE_MODEL = "gpt-4o-mini"
 
 # Load API key the same way as main.py
 load_dotenv(dotenv_path="./openai_key.env")
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_api_key = os.getenv("OPENAI_API_KEY")
+if not _api_key or _api_key == "your_api_key_here":
+    print("ERROR: OPENAI_API_KEY is not set or still the placeholder.")
+    print("Please set your key in openai_key.env")
+    sys.exit(1)
+client = OpenAI(api_key=_api_key)
 
 JUDGE_SYSTEM_PROMPT = """\
 Du bist ein strenger Evaluator fuer ein RAG-System ueber das Produkt "CloudBase".
@@ -60,7 +65,7 @@ Testgrund: {why}\
 
 
 def query_rag(question: str) -> dict:
-    resp = requests.get(f"{BASE_URL}/query_with_context", params={"query": question})
+    resp = requests.get(f"{BASE_URL}/query_with_context", params={"query": question}, timeout=60)
     resp.raise_for_status()
     return resp.json()
 
@@ -90,10 +95,7 @@ def check_retrieval(expected_doc: str, retrieved_filenames: list) -> bool:
     if expected_doc.upper() == "KEINE":
         return True
     expected_docs = [d.strip() for d in expected_doc.split("|")]
-    for doc in expected_docs:
-        if doc in retrieved_filenames:
-            return True
-    return False
+    return any(doc in retrieved_filenames for doc in expected_docs)
 
 
 def judge_answer(question: str, expected: str, actual: str, why: str) -> dict:
@@ -102,14 +104,17 @@ def judge_answer(question: str, expected: str, actual: str, why: str) -> dict:
         question=question, expected=expected, actual=actual, why=why,
     )
 
-    response = client.chat.completions.create(
-        model=JUDGE_MODEL,
-        temperature=0,
-        messages=[
-            {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-            {"role": "user", "content": user_msg},
-        ],
-    )
+    try:
+        response = client.chat.completions.create(
+            model=JUDGE_MODEL,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+    except APIError as e:
+        return {"verdict": "ERROR", "reason": f"Judge API failed: {e}"}
 
     raw = response.choices[0].message.content.strip()
 
@@ -132,7 +137,7 @@ def main():
     # Pre-flight: check server is running
     try:
         requests.get(f"{BASE_URL}/query?query=ping", timeout=5)
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException:
         print("ERROR: RAG server is not running!")
         print("Start it with: uvicorn main:app --host 127.0.0.1 --port 8000")
         sys.exit(1)
@@ -161,7 +166,7 @@ def main():
             answer = data.get("answer", "")
             sources = data.get("sources", [])
             chunks = format_chunks(sources)
-        except Exception as e:
+        except (requests.exceptions.RequestException, ValueError) as e:
             print(f"  RAG ERROR: {e}")
             answer = f"ERROR: {e}"
             sources = []

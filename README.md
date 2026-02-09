@@ -1,4 +1,4 @@
-# RAG AI Masterclass
+# RAG Eval Masterclass
 
 A hands-on workshop for learning how to evaluate Retrieval-Augmented Generation (RAG) systems. Built around a fictional product called **CloudBase**, with a knowledge base of 8 German-language articles and a 25-question golden test dataset.
 
@@ -18,8 +18,8 @@ A hands-on workshop for learning how to evaluate Retrieval-Augmented Generation 
 ## Setup
 
 ```bash
-git clone https://github.com/pandysp/RAG-AI-Masterclass.git
-cd RAG-AI-Masterclass
+git clone https://github.com/pandysp/RAG-Eval-Masterclass.git
+cd RAG-Eval-Masterclass
 make setup        # installs dependencies, creates openai_key.env
 # Edit openai_key.env and add your API key
 ```

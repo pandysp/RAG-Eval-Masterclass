@@ -24,7 +24,7 @@ OUTPUT_CSV = "evaluation_results.csv"
 
 
 def query_rag(question: str) -> dict:
-    resp = requests.get(f"{BASE_URL}/query_with_context", params={"query": question})
+    resp = requests.get(f"{BASE_URL}/query_with_context", params={"query": question}, timeout=60)
     resp.raise_for_status()
     return resp.json()
 
@@ -58,10 +58,7 @@ def check_retrieval(expected_doc: str, retrieved_filenames: list) -> bool:
     if expected_doc.upper() == "KEINE":
         return True
     expected_docs = [d.strip() for d in expected_doc.split("|")]
-    for doc in expected_docs:
-        if doc in retrieved_filenames:
-            return True
-    return False
+    return any(doc in retrieved_filenames for doc in expected_docs)
 
 
 def check_keywords(expected_keywords: str, answer: str) -> tuple:
@@ -82,7 +79,7 @@ def main():
     # Pre-flight: check server is running
     try:
         requests.get(f"{BASE_URL}/query?query=ping", timeout=5)
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException:
         print("ERROR: RAG server is not running!")
         print("Start it with: uvicorn main:app --host 127.0.0.1 --port 8000")
         sys.exit(1)
@@ -109,7 +106,7 @@ def main():
             answer = data.get("answer", "")
             sources = data.get("sources", [])
             chunks = format_chunks(sources)
-        except Exception as e:
+        except (requests.exceptions.RequestException, ValueError) as e:
             print(f"  ERROR: {e}")
             answer = f"ERROR: {e}"
             sources = []
@@ -126,11 +123,12 @@ def main():
         found_kw, missing_kw, kw_ratio = check_keywords(expected_keywords, answer)
         keyword_scores.append(kw_ratio)
 
-        status = (
-            "OK"
-            if retrieval_hit and kw_ratio == 1.0
-            else "PARTIAL" if retrieval_hit or kw_ratio > 0 else "FAIL"
-        )
+        if retrieval_hit and kw_ratio == 1.0:
+            status = "OK"
+        elif retrieval_hit or kw_ratio > 0:
+            status = "PARTIAL"
+        else:
+            status = "FAIL"
         print(
             f"  Retrieval: {'HIT' if retrieval_hit else 'MISS'} | "
             f"Keywords: {len(found_kw)}/{len(found_kw)+len(missing_kw)} | {status}"
