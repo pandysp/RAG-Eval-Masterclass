@@ -18,55 +18,45 @@ A hands-on workshop for learning how to evaluate Retrieval-Augmented Generation 
 ## Setup
 
 ```bash
-# Clone the repo
 git clone https://github.com/pandysp/RAG-AI-Masterclass.git
 cd RAG-AI-Masterclass
-
-# Install dependencies (creates .venv automatically)
-uv sync
-
-# Add your OpenAI API key
-cp openai_key.env.example openai_key.env
-# Edit openai_key.env and add your key
+make setup        # installs dependencies, creates openai_key.env
+# Edit openai_key.env and add your API key
 ```
+
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ## Usage
 
-### 1. Start the RAG server
+Run `make` to see all available commands:
 
-```bash
-uv run uvicorn main:app --host 127.0.0.1 --port 8000
+```
+  help         Show this help
+  setup        Install dependencies and prepare env file
+  server       Start the RAG server
+  collect      Collect RAG answers for manual review
+  eval         Run keyword evaluation
+  eval-llm     Run LLM-as-Judge evaluation
+  review       Open the annotation interface in the browser
+  clean        Remove result CSVs and cached outputs
+  reset        Remove index storage (forces rebuild on next server start)
 ```
 
-Open http://127.0.0.1:8000 for the chat interface.
-
-### 2. Collect answers (optional)
+### Quick start
 
 ```bash
-uv run python collect.py
+make server       # 1. Start the RAG server (http://127.0.0.1:8000)
+make eval         # 2. Run keyword evaluation → evaluation_results.csv
+make review       # 3. Open annotation interface in browser
 ```
 
-Saves all RAG answers to `collected_answers.csv` for manual inspection.
+### All evaluation scripts
 
-### 3. Run keyword evaluation
-
-```bash
-uv run python run_evaluation.py
-```
-
-Checks retrieval accuracy and keyword presence. Results go to `evaluation_results.csv`.
-
-### 4. Run LLM-as-Judge evaluation
-
-```bash
-uv run python run_evaluation_llm.py
-```
-
-Uses GPT-4o-mini to judge answer correctness semantically. Results go to `evaluation_results_llm.csv`.
-
-### 5. Review results
-
-Open `eval_review.html` in a browser and load the CSV from step 3. Rate each answer as correct, partial, or incorrect and add notes.
+| Command | Script | What it does |
+|---------|--------|-------------|
+| `make collect` | `collect.py` | Saves RAG answers to `collected_answers.csv` for manual inspection |
+| `make eval` | `run_evaluation.py` | Retrieval accuracy + keyword matching → `evaluation_results.csv` |
+| `make eval-llm` | `run_evaluation_llm.py` | LLM-as-Judge (GPT-4o-mini) → `evaluation_results_llm.csv` |
 
 ## Prompt iteration
 
@@ -86,10 +76,10 @@ The workshop flow:
 
 1. Run evaluation with `PROMPT_BASELINE` → note the scores
 2. Analyze errors (hallucinations, wrong language, incomplete answers)
-3. Switch to `PROMPT_IMPROVED` → delete `storage/` → restart server → re-run evaluation
+3. Switch to `PROMPT_IMPROVED` → `make reset` → restart server → re-run evaluation
 4. Compare scores to see the improvement
 
-> **Important:** After changing the prompt, delete the `storage/` directory so the index is rebuilt with the new prompt template.
+> **Important:** After changing the prompt, run `make reset` so the index is rebuilt on next server start.
 
 ## License
 
