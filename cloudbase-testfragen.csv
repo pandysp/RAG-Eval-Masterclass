@@ -1,0 +1,26 @@
+frage;warum;erwartete_antwort;erwartetes_dokument;erwartete_keywords
+Was kostet der CloudBase Professional Plan pro Monat?;Baseline — einfachste Faktenabfrage, steht prominent im Dokument;49€ pro Monat und Nutzer bei monatlicher Abrechnung;produkt-professional.md;49€,monat,nutzer
+Wie viele Projekte kann ich im Starter Plan gleichzeitig haben?;Numerisches Limit — verwechselt er es mit Professional?;Maximal 3 aktive Projekte gleichzeitig;produkt-starter.md;3,projekte
+Wie lautet die Login-URL für CloudBase?;Exakter String — URL muss zeichengenau sein;https://app.cloudbase.de/login;onboarding-login.md;app.cloudbase.de,login
+Wer ist die Ansprechpartnerin für Enterprise-Anfragen?;Eigennamen sind schwer für Retrieval;Sabine Meier ist die Ansprechpartnerin;produkt-enterprise.md;sabine meier
+Welche Integrationen bietet der Professional Plan?;Aufzählung: findet er alle?;Slack, Jira, Google Workspace, Microsoft 365;integrationen.md|produkt-professional.md;slack,jira,google workspace,microsoft 365
+Was passiert mit meinen Daten nach der Kündigung?;Zwei Fakten verknüpfen: Frist (90 Tage) + Konsequenz (gelöscht);Daten bleiben 90 Tage gespeichert, danach unwiderruflich gelöscht;abrechnung-kuendigung.md;90 tage,gelöscht
+Wie viele Teammitglieder sind im Professional Plan möglich?;Zahl aus ähnlichem Kontext — verwechselt er Starter/Professional?;Maximal 50 Teammitglieder pro Workspace;produkt-professional.md;50,teammitglieder
+Wie richte ich die Slack-Integration ein?;Prozessfrage: Schritt-für-Schritt;Unter Einstellungen, Integrationen, Slack, Verbinden;integrationen.md;einstellungen,integrationen,slack
+Was kostet der Starter Plan bei jährlicher Abrechnung?;Rechnung mit zwei Zahlen (7€/Monat, 84€/Jahr);7€ pro Monat und Nutzer bei jährlicher Abrechnung, 84€ pro Jahr;produkt-starter.md;7€,84€,jährlich,monat,nutzer
+Welches API-Limit hat der Professional Plan?;Technisches Kleingedrucktes — leicht vom Retrieval übersehen;1.000 Anfragen pro Stunde;produkt-professional.md;1.000,anfragen,stunde
+Welche Rollen gibt es in CloudBase?;Aufzählung: findet er die richtigen drei?;Admin, Projektleiter und Mitglied (oder Verweigerung bei Retrieval-Miss);team-berechtigungen.md|onboarding-login.md;keine,information
+Kann ein Projektleiter Teammitglieder zum Workspace einladen?;Einschränkung: erkennt er ein Nein?;Nein, nur Admins können Teammitglieder einladen;team-berechtigungen.md;nein,keine
+Wie lange ist der Einladungslink für neue Teammitglieder gültig?;Nebensächliches Detail in anderem Dokument — Retrieval-Challenge;Der Einladungslink ist 7 Tage gültig (oder Verweigerung bei Retrieval-Miss);onboarding-login.md;keine,information
+Welchen Fehlercode zeigt CloudBase bei Berechtigungsproblemen?;Technischer Code, exakter Match nötig;Fehlercode AUTH_403;fehlerbehebung.md;AUTH_403,berechtigung
+Wann wurde die Microsoft Teams-Integration veröffentlicht?;Datum + Status (Beta): zwei Fakten;Die Teams-Benachrichtigungen sind seit dem 10. Januar 2026 als Beta verfügbar;integrationen.md;10. januar 2026,teams
+Wie kann ich meine Daten exportieren bevor mein Account gelöscht wird?;Cross-Info: Export-Prozess + Kündigungsfrist verknüpfen;Unter Einstellungen, Daten, Export innerhalb der 90-Tage-Frist nach Kündigung;abrechnung-kuendigung.md;einstellungen,daten,export,90 tage
+Gibt es einen Rabatt für Non-Profit-Organisationen?;Unbeantwortbar: klingt plausibel, verleitet zu Halluzination;Keine Information verfügbar - sollte verweigern;KEINE;keine,information
+Kann ich CloudBase auf Französisch nutzen?;Unbeantwortbar: verleitet zu erfundener Sprachinfo;Keine Information verfügbar - sollte verweigern;KEINE;keine,information
+Bietet CloudBase eine mobile App an?;Unbeantwortbar: häufige Nutzerfrage, keine Info vorhanden;Keine Information verfügbar - sollte verweigern;KEINE;keine,information
+Wie kann ich meine Daten aus CloudBase in Notion importieren?;Halluzinations-Falle: Notion geplant aber nicht verfügbar;Notion-Integration ist erst für Q3 2026 geplant und noch nicht verfügbar (oder Verweigerung bei Retrieval-Miss);integrationen.md;keine,information
+Was ist der Unterschied zwischen Starter und Professional Plan?;Cross-Document: braucht Info aus 2 Artikeln;Starter: 9€, 3 Projekte, 5 Nutzer. Professional: 49€, unbegrenzte Projekte, 50 Nutzer;produkt-starter.md;9€,49€,3,50
+Wie hoch ist die garantierte Verfügbarkeit im Enterprise SLA?;Exakte Zahl aus Vertragsdokument — 99,9% muss wörtlich kommen;99,9% garantierte Verfügbarkeit;produkt-enterprise.md;99,9%,verfügbarkeit,sla
+Welche Zahlungsmethoden akzeptiert CloudBase?;Aufzählung aus einem leicht übersehenen Artikel;Kreditkarte, SEPA-Lastschrift, Rechnung für Enterprise (oder Verweigerung bei Retrieval-Miss);abrechnung-kuendigung.md;keine,information
+Wie viele Gastnutzer kann ich pro Workspace haben?;Neues Feature (Nov 2025), Detail-Check;Maximal 10 Gäste pro Workspace;team-berechtigungen.md;10,gast,workspace
+Wird Jira Server unterstützt oder nur Jira Cloud?;Einschränkung: erkennt er was NICHT geht?;Nur Jira Cloud, Jira Server und Data Center werden nicht unterstützt;integrationen.md;jira cloud,nicht unterstützt,server
