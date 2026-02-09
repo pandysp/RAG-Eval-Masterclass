@@ -1,0 +1,20 @@
+[project]
+name = "rag-ai-masterclass"
+version = "0.1.0"
+description = "RAG Evaluation Masterclass — Learn to evaluate Retrieval-Augmented Generation systems"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "llama-index-core",
+    "llama-index-embeddings-huggingface",
+    "llama-index-llms-openai",
+    "python-dotenv",
+    "ipython",
+    "pandas",
+    "tqdm",
+    "requests",
+    "openai",
+]

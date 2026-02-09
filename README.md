@@ -22,12 +22,8 @@ A hands-on workshop for learning how to evaluate Retrieval-Augmented Generation 
 git clone https://github.com/pandysp/RAG-AI-Masterclass.git
 cd RAG-AI-Masterclass
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (creates .venv automatically)
+uv sync
 
 # Add your OpenAI API key
 cp openai_key.env.example openai_key.env
@@ -39,7 +35,7 @@ cp openai_key.env.example openai_key.env
 ### 1. Start the RAG server
 
 ```bash
-uvicorn main:app --host 127.0.0.1 --port 8000
+uv run uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 Open http://127.0.0.1:8000 for the chat interface.
@@ -47,7 +43,7 @@ Open http://127.0.0.1:8000 for the chat interface.
 ### 2. Collect answers (optional)
 
 ```bash
-python collect.py
+uv run python collect.py
 ```
 
 Saves all RAG answers to `collected_answers.csv` for manual inspection.
@@ -55,7 +51,7 @@ Saves all RAG answers to `collected_answers.csv` for manual inspection.
 ### 3. Run keyword evaluation
 
 ```bash
-python run_evaluation.py
+uv run python run_evaluation.py
 ```
 
 Checks retrieval accuracy and keyword presence. Results go to `evaluation_results.csv`.
@@ -63,7 +59,7 @@ Checks retrieval accuracy and keyword presence. Results go to `evaluation_result
 ### 4. Run LLM-as-Judge evaluation
 
 ```bash
-python run_evaluation_llm.py
+uv run python run_evaluation_llm.py
 ```
 
 Uses GPT-4o-mini to judge answer correctness semantically. Results go to `evaluation_results_llm.csv`.

@@ -8,8 +8,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-venv/
-ENV/
 .venv/
 
 # Index storage (rebuilt per environment)
